@@ -62,8 +62,6 @@ enum Commands {
         hash: String,
         #[arg(long, default_value_t = 100)]
         iterations: u32,
-        #[arg(long)]
-        certreq: bool,
     },
     /// Bakiyeyi kontrol et
     Credits {
@@ -144,7 +142,7 @@ fn compute_file_digest(path: &str, alg: &str) -> Result<Vec<u8>> {
     }
 }
 
-fn build_tsa_request(digest: &[u8], hash_alg: &str, certreq: bool) -> Result<Vec<u8>> {
+fn build_tsa_request(digest: &[u8], hash_alg: &str) -> Result<Vec<u8>> {
     let oid = match hash_alg.to_lowercase().as_str() {
         "sha1" => ObjectIdentifier::from_slice(OID_SHA1),
         "sha256" => ObjectIdentifier::from_slice(OID_SHA256),
@@ -173,11 +171,6 @@ fn build_tsa_request(digest: &[u8], hash_alg: &str, certreq: bool) -> Result<Vec
 
             // nonce
             writer.next().write_u64(nonce);
-
-            // sertifika isteği (certReq)
-            if certreq {
-                writer.next().write_bool(true);
-            }
         })
     });
 
@@ -272,7 +265,6 @@ async fn main() -> Result<()> {
             digest_hex,
             hash,
             iterations,
-            certreq,
         } => {
             let (digest, output_filename) = if let Some(path) = &file {
                 let digest = compute_file_digest(path, &hash)?;
@@ -296,7 +288,7 @@ async fn main() -> Result<()> {
                 anyhow::bail!("--file veya --digest-hex parametrelerinden biri sağlanmalıdır");
             };
 
-            let der = build_tsa_request(&digest, &hash, certreq)?;
+            let der = build_tsa_request(&digest, &hash)?;
             let identity = build_identity(customer_id, &password, &digest, iterations)?;
 
             let client = reqwest::Client::new();
