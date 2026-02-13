@@ -1,6 +1,8 @@
 
 # kamusm-zd-rs
 
+> 🇬🇧 [English](README_EN.md)
+
 RFC 3161 ve Kamu SM'nin kimlik doğrulama protokolünü destekleyen, Rust ile yazılmış, resmi Java istemcisiyle uyumlu Kamu SM zaman damgası istemcisi.
 
 ## İçindekiler
